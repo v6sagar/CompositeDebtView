@@ -3,3 +3,5 @@ pandas
 days360
 numpy_financial
 matplotlib
+brotli
+zstandard
