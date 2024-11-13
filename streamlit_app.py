@@ -10,14 +10,17 @@ import time
 from io import StringIO
 import threading
 import matplotlib.pyplot as plt
+import zstandard as zstd
+import brotli
 pd.set_option('display.show_dimensions', False)
 
 url = "https://www.nseindia.com/api/liveBonds-traded-on-cm?type=gsec"
 base_url = "https://www.nseindia.com"
 headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36",
-    "Accept-Encoding": "gzip, deflate, br",
-    "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36",
+    "Accept-Encoding": "gzip, deflate, br, zstd",
+    "Accept-Language": "en-US,en;q=0.9",
+    "referer": "https://www.nseindia.com/market-data/bonds-traded-in-capital-market"
 }
 
 curr_filter = ['563GS2026','574GS2026','585GS2030','610GS2031','622GS2035','645GS2029','664GS2035','676GS2061','699GS2026','699GS2051','702GS2031','706GS2028','716GS2050','717GS2030','718GJ28','723GS2039','725GJ26','725GS2063','726KA25','727GS2026','732GS2030','733GS2026','734GS2064','736GS2052','737GS2028','739ML26','73GS2053','742GJ33','743CG29','743GJ31','747HR36','748KA33','748MH35','749GJ28','749HR36','749MH36','74GJ27','74GS2062','754GS2036','754KA41','755GJ31','757GS2033','758GJ26','758GJ32','759TS37','762GS2039','763MH35','763MH36','763TS43','767AP38','769GS2043','769HR27','773MH32','773UP34','774AP32A','774GA32','774MP43','774RJ33A','77AP32','77MH33A','783RJ50','789WB40','794TN32']
@@ -115,7 +118,17 @@ def fetch_update():
         response = session.get(url, headers=headers)
         print("request sent", response.status_code)
         if response.status_code == 200:
-            data = json.loads(response.text)
+            try:
+                decompressed_content = brotli.decompress(response.content)
+                response_text = decompressed_content.decode('utf-8')  # Decode as UTF-8
+                    
+                # Process data (your processing code goes here)
+                
+            except brotli.error as e:
+                print(f"Brotli decompression error: {e}")
+                response_text = response.content
+
+            data = json.loads(response_text)
             response.close()
             data_list = data['data']
             extracted_data = []

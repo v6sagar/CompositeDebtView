@@ -1,12 +1,5 @@
 streamlit
 pandas
-requests
-json
-datetime 
-dateutil
 days360
 numpy_financial
-time
-io
-threading
 matplotlib
